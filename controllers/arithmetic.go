@@ -26,14 +26,29 @@ var actionMap = map[string]func(int, int) (int, error){
 
 var resultCache = map[string]int{}
 
+// ContentNegotiationConfigurable interface that handles content type negotiation
+type ContentNegotiationConfigurable interface {
+	ServeJSON(c *beego.Controller, serve bool)
+}
+
+// ContentNegotiation struct that handles content type negotiation
+type ContentNegotiation struct {
+}
+
+// ServeJSON Wrapper for the controller.ServeJSON Method
+func (c *ContentNegotiation) ServeJSON(controller *beego.Controller, serve bool) {
+	controller.ServeJSON(serve)
+}
+
 // ArithmeticController Web Controller that will handle all arithmetic expressions
 type ArithmeticController struct {
 	beego.Controller
+	configurer ContentNegotiationConfigurable
 }
 
-// Finish runs after request function execution.
-func (c *ArithmeticController) Finish() {
-	c.ServeJSON(true)
+// Prepare runs after Init before request function execution.
+func (c *ArithmeticController) Prepare() {
+	c.configurer = &ContentNegotiation{}
 }
 
 // Action handles the arithmetic actions between two integers x and y
@@ -54,6 +69,7 @@ func (c *ArithmeticController) Action() {
 		} else {
 			c.Data["json"] = m.Result{Action: action, Answer: answer, Cached: cached, X: x, Y: y}
 		}
+		c.configurer.ServeJSON(&c.Controller, true)
 	}()
 
 	if x, y, err = c.validate(); err != nil {

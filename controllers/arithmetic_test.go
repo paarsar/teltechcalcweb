@@ -5,8 +5,20 @@ import (
 	m "teltechcalcweb/models"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 )
+
+type MockConfigure struct {
+	mock.Mock
+}
+
+// ServeJSON Wrapper for the controller.ServeJSON Method
+func (c *MockConfigure) ServeJSON(controller *beego.Controller, serve bool) {
+
+}
 
 func TestActionCaching(t *testing.T) {
 
@@ -26,6 +38,7 @@ func TestActionCaching(t *testing.T) {
 	for _, table := range tables {
 
 		a := ArithmeticController{}
+		a.configurer = &MockConfigure{}
 		a.Ctx = &context.Context{
 			Input:  context.NewInput(),
 			Output: context.NewOutput(),
@@ -66,6 +79,7 @@ func TestAction(t *testing.T) {
 	for _, table := range tables {
 
 		a := ArithmeticController{}
+		a.configurer = &MockConfigure{}
 		a.Ctx = &context.Context{
 			Input:  context.NewInput(),
 			Output: context.NewOutput(),
@@ -101,6 +115,7 @@ func TestValidate(t *testing.T) {
 	for _, table := range tables {
 
 		a := ArithmeticController{}
+		a.configurer = &MockConfigure{}
 		a.Ctx = &context.Context{
 			Input: context.NewInput(),
 		}
