@@ -31,9 +31,14 @@ type ArithmeticController struct {
 	beego.Controller
 }
 
-// Add adds two integers x and y
+// Finish runs after request function execution.
+func (c *ArithmeticController) Finish() {
+	c.ServeJSON(true)
+}
+
+// Action handles the arithmetic actions between two integers x and y
 // @router /:action [get]
-func (c *ArithmeticController) Add() {
+func (c *ArithmeticController) Action() {
 
 	var err error
 	var x, y, answer int
@@ -49,7 +54,6 @@ func (c *ArithmeticController) Add() {
 		} else {
 			c.Data["json"] = m.Result{Action: action, Answer: answer, Cached: cached, X: x, Y: y}
 		}
-		c.ServeJSON(true)
 	}()
 
 	if x, y, err = c.validate(); err != nil {
@@ -109,12 +113,14 @@ func multi(x, y int) (answer int, err error) {
 	return
 }
 
+// createCacheKey creates a cache key for the result cache
 func createCacheKey(f func(int, int) (int, error), x, y int) string {
 	ints := []int{x, y}
 	sort.Ints(ints)
 	return functionName(f) + "-" + strings.Trim(strings.Replace(fmt.Sprint(ints), " ", "", -1), "[]")
 }
 
+//functionName gets the name of the function passed
 func functionName(i func(int, int) (int, error)) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }
